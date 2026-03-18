@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Inscription{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="login-container" style="max-width: 550px;">
+        <div class="login-header">
+            <span class="dragon-logo">🐉</span>
+            <h1>DragonBank</h1>
+            <p>Rejoignez le clan du Dragon</p>
+        </div>
+        
+        <div class="login-card fade-in">
+            <h2>Créer un compte</h2>
+            
+            <form method="POST" action="{{ url_for('register') }}">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Prénom *</label>
+                            <input type="text" name="first_name" class="form-control" 
+                                   placeholder="Jean" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Nom *</label>
+                            <input type="text" name="last_name" class="form-control" 
+                                   placeholder="Dupont" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-envelope"></i> Email *
+                    </label>
+                    <input type="email" name="email" class="form-control" 
+                           placeholder="votre@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-telephone"></i> Téléphone
+                    </label>
+                    <input type="tel" name="phone" class="form-control" 
+                           placeholder="+33 6 12 34 56 78">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-geo-alt"></i> Adresse
+                    </label>
+                    <input type="text" name="address" class="form-control" 
+                           placeholder="12 Rue de la Paix, 75001 Paris">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-calendar"></i> Date de naissance
+                    </label>
+                    <input type="date" name="date_of_birth" class="form-control">
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-lock"></i> Mot de passe *
+                            </label>
+                            <input type="password" name="password" class="form-control" 
+                                   placeholder="Min. 6 caractères" minlength="6" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-lock-fill"></i> Confirmer *
+                            </label>
+                            <input type="password" name="confirm_password" class="form-control" 
+                                   placeholder="Confirmer" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-dragon w-100 mt-3">
+                    <i class="bi bi-person-plus"></i> Créer mon compte
+                </button>
+            </form>
+            
+            <hr class="my-3">
+            
+            <p class="text-center">
+                <a href="{{ url_for('login') }}" class="text-decoration-none" 
+                   style="color: var(--dragon-accent);">
+                    <i class="bi bi-arrow-left"></i> Déjà un compte ? Se connecter
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

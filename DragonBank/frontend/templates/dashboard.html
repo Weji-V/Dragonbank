@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <!-- HEADER -->
+    <div class="page-header fade-in">
+        <h1>Bienvenue {{ user.get('first_name', '') }} 🐉</h1>
+        <p>Voici un aperçu de vos finances</p>
+    </div>
+
+    <!-- STATISTIQUES -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-3 col-md-6 fade-in delay-1">
+            <div class="stat-card primary">
+                <div class="stat-icon"><i class="bi bi-wallet2"></i></div>
+                <div class="stat-value">{{ "%.2f"|format(stats.get('total_balance', 0)) }} €</div>
+                <div class="stat-label">Solde total</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 fade-in delay-2">
+            <div class="stat-card success">
+                <div class="stat-icon"><i class="bi bi-credit-card"></i></div>
+                <div class="stat-value">{{ stats.get('total_accounts', 0) }}</div>
+                <div class="stat-label">Comptes actifs</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 fade-in delay-3">
+            <div class="stat-card info">
+                <div class="stat-icon"><i class="bi bi-arrow-left-right"></i></div>
+                <div class="stat-value">{{ stats.get('monthly_transactions', 0) }}</div>
+                <div class="stat-label">Transactions ce mois</div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 fade-in delay-4">
+            <div class="stat-card warning">
+                <div class="stat-icon"><i class="bi bi-people"></i></div>
+                <div class="stat-value">{{ stats.get('total_beneficiaries', 0) }}</div>
+                <div class="stat-label">Bénéficiaires</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- MES COMPTES -->
+        <div class="col-lg-7 fade-in delay-2">
+            <div class="section-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="section-title mb-0" style="border:none; padding:0;">
+                        <i class="bi bi-wallet2"></i> Mes Comptes
+                    </h3>
+                    <a href="{{ url_for('open_account') }}" class="btn btn-sm btn-dragon">
+                        <i class="bi bi-plus-circle"></i> Ouvrir un compte
+                    </a>
+                </div>
+                
+                {% if accounts %}
+                    {% for account in accounts %}
+                    <div class="account-card {{ account.account_type }}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <span class="account-type-badge {{ account.account_type }}">
+                                    {% if account.account_type == 'courant' %}
+                                        <i class="bi bi-credit-card"></i> Compte Courant
+                                    {% elif account.account_type == 'livret_a' %}
+                                        <i class="bi bi-piggy-bank"></i> Livret A
+                                    {% elif account.account_type == 'assurance_vie' %}
+                                        <i class="bi bi-shield-check"></i> Assurance Vie
+                                    {% endif %}
+                                </span>
+                                <div class="account-number mt-2">
+                                    {{ account.account_number }}
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="account-balance">
+                                    {{ "%.2f"|format(account.balance) }} €
+                                </div>
+                                {% if account.interest_rate > 0 %}
+                                <small class="text-success">
+                                    <i class="bi bi-graph-up-arrow"></i> 
+                                    {{ "%.2f"|format(account.interest_rate * 100) }}% / jour
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-wallet" style="font-size: 3rem;"></i>
+                        <p class="mt-2">Aucun compte trouvé</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ACTIONS RAPIDES + DERNIÈRES TRANSACTIONS -->
+        <div class="col-lg-5 fade-in delay-3">
+            <!-- Actions rapides -->
+            <div class="section-card mb-4">
+                <h3 class="section-title">
+                    <i class="bi bi-lightning-charge"></i> Actions rapides
+                </h3>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('transfer') }}" class="btn btn-dragon">
+                        <i class="bi bi-arrow-left-right"></i> Faire un virement
+                    </a>
+                    <a href="{{ url_for('add_beneficiary') }}" class="btn btn-gold">
+                        <i class="bi bi-person-plus"></i> Ajouter un bénéficiaire
+                    </a>
+                    <a href="{{ url_for('transfer_external') }}" class="btn btn-success-custom">
+                        <i class="bi bi-bank"></i> Virement externe
+                    </a>
+                </div>
+            </div>
+
+            <!-- Dernières transactions -->
+            <div class="section-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="section-title mb-0" style="border:none; padding:0;">
+                        <i class="bi bi-clock-history"></i> Dernières opérations
+                    </h3>
+                    <a href="{{ url_for('transactions') }}" class="btn btn-sm btn-dragon-outline">
+                        Voir tout
+                    </a>
+                </div>
+                
+                {% if recent_transactions %}
+                    {% for tx in recent_transactions %}
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <div>
+                            <div class="fw-bold" style="font-size: 0.9rem;">
+                                {{ tx.description[:40] }}{% if tx.description|length > 40 %}...{% endif %}
+                            </div>
+                            <small class="text-muted">
+                                {{ tx.created_at[:10] if tx.created_at else '' }}
+                            </small>
+                        </div>
+                        <div>
+                            <span class="fw-bold" style="color: {% if tx.transaction_type in ['depot', 'interets'] %}var(--dragon-success){% else %}var(--dragon-accent){% endif %};">
+                                {{ "%.2f"|format(tx.amount) }} €
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center text-muted py-3">Aucune transaction récente</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

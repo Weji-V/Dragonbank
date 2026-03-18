@@ -1,0 +1,565 @@
+/* ============================================
+   DragonBank - Styles CSS
+   ============================================ */
+
+   :root {
+    --dragon-primary: #1a1a2e;
+    --dragon-secondary: #16213e;
+    --dragon-accent: #e94560;
+    --dragon-gold: #f5a623;
+    --dragon-success: #00b894;
+    --dragon-info: #0984e3;
+    --dragon-warning: #fdcb6e;
+    --dragon-danger: #d63031;
+    --dragon-light: #f8f9fa;
+    --dragon-dark: #0f0f23;
+    --dragon-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    --dragon-card-bg: #ffffff;
+    --dragon-text: #2d3436;
+    --dragon-text-light: #636e72;
+    --dragon-border: #dfe6e9;
+    --dragon-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --dragon-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    color: var(--dragon-text);
+    min-height: 100vh;
+}
+
+/* ============================================
+   NAVBAR
+   ============================================ */
+.navbar {
+    background: var(--dragon-gradient) !important;
+    padding: 0.8rem 1.5rem;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.navbar-brand .dragon-icon {
+    font-size: 1.8rem;
+    margin-right: 8px;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    border-radius: 8px;
+    transition: var(--transition);
+    margin: 0 2px;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: #fff !important;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.nav-link i {
+    margin-right: 5px;
+}
+
+.user-badge {
+    background: rgba(245, 166, 35, 0.2);
+    border: 1px solid var(--dragon-gold);
+    color: var(--dragon-gold);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* ============================================
+   LOGIN PAGE
+   ============================================ */
+.login-page {
+    min-height: 100vh;
+    background: var(--dragon-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 450px;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-header h1 {
+    color: #fff;
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.login-header .dragon-logo {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.login-header p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+}
+
+.login-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.login-card h2 {
+    color: var(--dragon-primary);
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+/* ============================================
+   FORMS
+   ============================================ */
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--dragon-text);
+    margin-bottom: 0.4rem;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    border: 2px solid var(--dragon-border);
+    border-radius: 10px;
+    padding: 12px 15px;
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    border-color: var(--dragon-accent);
+    box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.15);
+}
+
+.form-select {
+    border: 2px solid var(--dragon-border);
+    border-radius: 10px;
+    padding: 12px 15px;
+    font-size: 1rem;
+}
+
+.form-select:focus {
+    border-color: var(--dragon-accent);
+    box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.15);
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn-dragon {
+    background: var(--dragon-accent);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-dragon:hover {
+    background: #d63051;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+}
+
+.btn-dragon-outline {
+    background: transparent;
+    color: var(--dragon-accent);
+    border: 2px solid var(--dragon-accent);
+    padding: 10px 25px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn-dragon-outline:hover {
+    background: var(--dragon-accent);
+    color: white;
+}
+
+.btn-gold {
+    background: var(--dragon-gold);
+    color: var(--dragon-dark);
+    border: none;
+    padding: 12px 30px;
+    border-radius: 10px;
+    font-weight: 700;
+    transition: var(--transition);
+}
+
+.btn-gold:hover {
+    background: #e09500;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(245, 166, 35, 0.4);
+}
+
+.btn-success-custom {
+    background: var(--dragon-success);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 10px;
+    font-weight: 700;
+    transition: var(--transition);
+}
+
+.btn-success-custom:hover {
+    background: #00a383;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   DASHBOARD
+   ============================================ */
+.main-content {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    color: var(--dragon-primary);
+    font-weight: 800;
+    font-size: 2rem;
+}
+
+.page-header p {
+    color: var(--dragon-text-light);
+    font-size: 1.1rem;
+}
+
+/* ============================================
+   STAT CARDS
+   ============================================ */
+.stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--dragon-shadow);
+    transition: var(--transition);
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--dragon-shadow-hover);
+}
+
+.stat-card.primary::before { background: var(--dragon-accent); }
+.stat-card.success::before { background: var(--dragon-success); }
+.stat-card.info::before { background: var(--dragon-info); }
+.stat-card.warning::before { background: var(--dragon-gold); }
+
+.stat-card .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.stat-card.primary .stat-icon { background: rgba(233, 69, 96, 0.1); color: var(--dragon-accent); }
+.stat-card.success .stat-icon { background: rgba(0, 184, 148, 0.1); color: var(--dragon-success); }
+.stat-card.info .stat-icon { background: rgba(9, 132, 227, 0.1); color: var(--dragon-info); }
+.stat-card.warning .stat-icon { background: rgba(245, 166, 35, 0.1); color: var(--dragon-gold); }
+
+.stat-card .stat-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--dragon-primary);
+    line-height: 1;
+}
+
+.stat-card .stat-label {
+    font-size: 0.85rem;
+    color: var(--dragon-text-light);
+    margin-top: 0.3rem;
+    font-weight: 500;
+}
+
+/* ============================================
+   ACCOUNT CARDS
+   ============================================ */
+.account-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--dragon-shadow);
+    transition: var(--transition);
+    margin-bottom: 1rem;
+    border-left: 5px solid;
+}
+
+.account-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--dragon-shadow-hover);
+}
+
+.account-card.courant { border-left-color: var(--dragon-info); }
+.account-card.livret_a { border-left-color: var(--dragon-success); }
+.account-card.assurance_vie { border-left-color: var(--dragon-gold); }
+
+.account-type-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.account-type-badge.courant { background: rgba(9, 132, 227, 0.1); color: var(--dragon-info); }
+.account-type-badge.livret_a { background: rgba(0, 184, 148, 0.1); color: var(--dragon-success); }
+.account-type-badge.assurance_vie { background: rgba(245, 166, 35, 0.1); color: var(--dragon-gold); }
+
+.account-balance {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--dragon-primary);
+}
+
+.account-number {
+    font-family: 'Courier New', monospace;
+    color: var(--dragon-text-light);
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+.custom-table {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--dragon-shadow);
+}
+
+.custom-table .table {
+    margin-bottom: 0;
+}
+
+.custom-table .table thead {
+    background: var(--dragon-primary);
+    color: white;
+}
+
+.custom-table .table thead th {
+    font-weight: 600;
+    padding: 1rem;
+    border: none;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.custom-table .table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--dragon-border);
+}
+
+.custom-table .table tbody tr:hover {
+    background-color: rgba(233, 69, 96, 0.03);
+}
+
+.transaction-amount.credit {
+    color: var(--dragon-success);
+    font-weight: 700;
+}
+
+.transaction-amount.debit {
+    color: var(--dragon-danger);
+    font-weight: 700;
+}
+
+/* ============================================
+   TRANSACTION STATUS BADGES
+   ============================================ */
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.status-badge.completed { background: rgba(0, 184, 148, 0.1); color: var(--dragon-success); }
+.status-badge.pending { background: rgba(253, 203, 110, 0.2); color: #e17055; }
+.status-badge.failed { background: rgba(214, 48, 49, 0.1); color: var(--dragon-danger); }
+
+/* ============================================
+   SECTIONS
+   ============================================ */
+.section-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--dragon-shadow);
+    margin-bottom: 1.5rem;
+}
+
+.section-card .section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--dragon-primary);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--dragon-border);
+}
+
+/* ============================================
+   ALERTS
+   ============================================ */
+.alert {
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+}
+
+.alert-success {
+    background: rgba(0, 184, 148, 0.1);
+    color: #00a383;
+    border-left: 4px solid var(--dragon-success);
+}
+
+.alert-danger {
+    background: rgba(214, 48, 49, 0.1);
+    color: #c0392b;
+    border-left: 4px solid var(--dragon-danger);
+}
+
+.alert-warning {
+    background: rgba(253, 203, 110, 0.15);
+    color: #e17055;
+    border-left: 4px solid var(--dragon-gold);
+}
+
+.alert-info {
+    background: rgba(9, 132, 227, 0.1);
+    color: var(--dragon-info);
+    border-left: 4px solid var(--dragon-info);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 1rem;
+    }
+    
+    .stat-card .stat-value {
+        font-size: 1.4rem;
+    }
+    
+    .account-balance {
+        font-size: 1.5rem;
+    }
+    
+    .login-card {
+        padding: 1.5rem;
+    }
+    
+    .login-header h1 {
+        font-size: 2rem;
+    }
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.footer {
+    background: var(--dragon-primary);
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: 3rem;
+    font-size: 0.85rem;
+}
+
+.footer a {
+    color: var(--dragon-gold);
+    text-decoration: none;
+}

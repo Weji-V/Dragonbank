@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Mes Comptes{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <div>
+            <h1><i class="bi bi-wallet2"></i> Mes Comptes</h1>
+            <p>Gérez vos comptes bancaires</p>
+        </div>
+        <a href="{{ url_for('open_account') }}" class="btn btn-dragon">
+            <i class="bi bi-plus-circle"></i> Ouvrir un compte
+        </a>
+    </div>
+
+    <div class="row g-4">
+        {% for account in accounts %}
+        <div class="col-lg-6 fade-in delay-{{ loop.index }}">
+            <div class="account-card {{ account.account_type }}" style="padding: 2rem;">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <span class="account-type-badge {{ account.account_type }}">
+                        {% if account.account_type == 'courant' %}
+                            <i class="bi bi-credit-card"></i> Compte Courant
+                        {% elif account.account_type == 'livret_a' %}
+                            <i class="bi bi-piggy-bank"></i> Livret A
+                        {% elif account.account_type == 'assurance_vie' %}
+                            <i class="bi bi-shield-check"></i> Assurance Vie
+                        {% endif %}
+                    </span>
+                    <span class="status-badge completed">
+                        <i class="bi bi-check-circle"></i> {{ account.status }}
+                    </span>
+                </div>
+                
+                <div class="account-balance mb-2">
+                    {{ "%.2f"|format(account.balance) }} €
+                </div>
+                
+                <div class="account-number mb-3">
+                    <i class="bi bi-hash"></i> {{ account.account_number }}
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <i class="bi bi-calendar"></i> 
+                        Ouvert le {{ account.created_at[:10] if account.created_at else 'N/A' }}
+                    </small>
+                    {% if account.interest_rate > 0 %}
+                    <small class="text-success fw-bold">
+                        <i class="bi bi-graph-up-arrow"></i> 
+                        Taux: {{ "%.2f"|format(account.interest_rate * 100) }}%
+                    </small>
+                    {% endif %}
+                </div>
+                
+                <div class="mt-3 d-flex gap-2">
+                    <a href="{{ url_for('transactions', account_id=account.id) }}" 
+                       class="btn btn-sm btn-dragon-outline">
+                        <i class="bi bi-clock-history"></i> Historique
+                    </a>
+                    <a href="{{ url_for('transfer') }}" class="btn btn-sm btn-dragon">
+                        <i class="bi bi-arrow-left-right"></i> Virement
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="section-card text-center py-5">
+                <i class="bi bi-wallet" style="font-size: 4rem; color: var(--dragon-text-light);"></i>
+                <h3 class="mt-3">Aucun compte bancaire</h3>
+                <p class="text-muted">Ouvrez votre premier compte pour commencer</p>
+                <a href="{{ url_for('open_account') }}" class="btn btn-dragon mt-2">
+                    <i class="bi bi-plus-circle"></i> Ouvrir un compte
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

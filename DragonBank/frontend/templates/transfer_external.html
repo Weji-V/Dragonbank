@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Virement Externe{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="bi bi-bank"></i> Virement Externe</h1>
+        <p>Envoyer ou recevoir un virement depuis une autre banque</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="section-card fade-in">
+                <form method="POST" action="{{ url_for('transfer_external') }}">
+                    <!-- Direction -->
+                    <div class="form-group">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-arrow-down-up"></i> Direction
+                        </label>
+                        <select name="direction" class="form-select" required>
+                            <option value="">-- Choisir --</option>
+                            <option value="incoming">Réception (depuis une autre banque)</option>
+                            <option value="outgoing">Envoi (vers une autre banque)</option>
+                        </select>
+                    </div>
+
+                    <!-- Mon compte -->
+                    <div class="form-group">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-wallet2"></i> Mon compte DragonBank
+                        </label>
+                        <select name="account_id" class="form-select" required>
+                            <option value="">-- Choisir --</option>
+                            {% for account in accounts %}
+                            <option value="{{ account.id }}">
+                                {{ account.account_type | upper }} - 
+                                {{ account.account_number }}
+                                ({{ "%.2f"|format(account.balance) }} €)
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Banque externe -->
+                    <div class="form-group">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-building"></i> Nom de la banque externe
+                        </label>
+                        <input type="text" name="external_bank_name" class="form-control" 
+                               placeholder="Ex: BNP Paribas, Société Générale..." required>
+                    </div>
+
+                    <!-- Compte externe -->
+                    <div class="form-group">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-hash"></i> Numéro de compte externe
+                        </label>
+                        <input type="text" name="external_account_number" class="form-control" 
+                               placeholder="IBAN ou numéro de compte" required>
+                    </div>
+
+                    <!-- Montant -->
+                    <div class="form-group">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-currency-euro"></i> Montant (€)
+                        </label>
+                        <input type="number" name="amount" class="form-control" 
+                               placeholder="0.00" min="0.01" step="0.01" required>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-chat-left-text"></i> Motif (optionnel)
+                        </label>
+                        <input type="text" name="description" class="form-control" 
+                               placeholder="Ex: Transfert épargne">
+                    </div>
+
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Note:</strong> Les virements externes sont simulés dans cette démo.
+                        En production, ils seraient traités via le réseau bancaire SEPA.
+                    </div>
+
+                    <button type="submit" class="btn btn-dragon w-100 mt-2">
+                        <i class="bi bi-send"></i> Effectuer le virement
+                    </button>
+                    
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-dragon-outline w-100 mt-2">
+                        <i class="bi bi-arrow-left"></i> Annuler
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Connexion{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="login-container">
+        <div class="login-header">
+            <span class="dragon-logo">🐉</span>
+            <h1>DragonBank</h1>
+            <p>Votre banque. Votre pouvoir.</p>
+        </div>
+        
+        <div class="login-card fade-in">
+            <h2>Connexion</h2>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} mb-3">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+            
+            <form method="POST" action="{{ url_for('login') }}">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-envelope"></i> Email
+                    </label>
+                    <input type="email" name="email" class="form-control" 
+                           placeholder="votre@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-lock"></i> Mot de passe
+                    </label>
+                    <input type="password" name="password" class="form-control" 
+                           placeholder="••••••••" required>
+                </div>
+                
+                <button type="submit" class="btn btn-dragon w-100 mt-3">
+                    <i class="bi bi-box-arrow-in-right"></i> Se connecter
+                </button>
+            </form>
+            
+            <hr class="my-4">
+            
+            <p class="text-center text-muted mb-2">Pas encore de compte ?</p>
+            <a href="{{ url_for('register') }}" class="btn btn-dragon-outline w-100">
+                <i class="bi bi-person-plus"></i> Créer un compte
+            </a>
+            
+            <div class="text-center mt-4">
+                <small class="text-muted">
+                    <i class="bi bi-shield-check"></i> 
+                    Connexion sécurisée par Dragon Shield™
+                </small>
+            </div>
+        </div>
+        
+        <div class="text-center mt-3">
+            <small style="color: rgba(255,255,255,0.5);">
+                Compte test: jean.dupont@email.com / password123
+            </small>
+        </div>
+    </div>
+</div>
+{% endblock %}
