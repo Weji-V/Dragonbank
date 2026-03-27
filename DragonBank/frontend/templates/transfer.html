@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}Effectuer un Virement{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="bi bi-arrow-left-right"></i> Effectuer un Virement</h1>
+        <p>Virement interne entre vos comptes ou vers un bénéficiaire</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="section-card fade-in">
+
+                <form method="POST" action="{{ url_for('transfer') }}" id="transferForm">
+
+                    <!-- Type de virement -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-arrow-repeat"></i> Type de virement *
+                        </label>
+                        <select name="transfer_type" class="form-select" id="transferType" required>
+                            <option value="">-- Choisissez un type --</option>
+                            <option value="internal">Virement interne (entre mes comptes)</option>
+                            <option value="person">Virement vers un bénéficiaire</option>
+                        </select>
+                    </div>
+
+                    <!-- Compte source (commun aux deux types) -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-wallet2"></i> Compte source *
+                        </label>
+                        <select name="from_account_id" class="form-select" required>
+                            <option value="">-- Choisissez un compte --</option>
+                            {% for account in accounts %}
+                            <option value="{{ account.id }}">
+                                {{ account.account_number }}
+                                —
+                                {% if account.account_type == 'courant' %}Compte Courant
+                                {% elif account.account_type == 'livret_a' %}Livret A
+                                {% elif account.account_type == 'assurance_vie' %}Assurance Vie
+                                {% else %}{{ account.account_type }}{% endif %}
+                                — {{ "%.2f"|format(account.balance) }} €
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Compte destination (virement interne) -->
+                    <div class="form-group" id="toAccountGroup" style="display: none;">
+                        <label class="form-label">
+                            <i class="bi bi-wallet"></i> Compte destination *
+                        </label>
+                        <select name="to_account_id" class="form-select" id="toAccountSelect">
+                            <option value="">-- Choisissez un compte --</option>
+                            {% for account in accounts %}
+                            <option value="{{ account.id }}">
+                                {{ account.account_number }}
+                                —
+                                {% if account.account_type == 'courant' %}Compte Courant
+                                {% elif account.account_type == 'livret_a' %}Livret A
+                                {% elif account.account_type == 'assurance_vie' %}Assurance Vie
+                                {% else %}{{ account.account_type }}{% endif %}
+                                — {{ "%.2f"|format(account.balance) }} €
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Bénéficiaire (virement entre personnes) -->
+                    <div class="form-group" id="beneficiaryGroup" style="display: none;">
+                        <label class="form-label">
+                            <i class="bi bi-person"></i> Bénéficiaire *
+                        </label>
+                        {% if beneficiaries %}
+                        <select name="beneficiary_id" class="form-select" id="beneficiarySelect">
+                            <option value="">-- Choisissez un bénéficiaire --</option>
+                            {% for b in beneficiaries %}
+                            <option value="{{ b.id }}">
+                                {{ b.beneficiary_name }} — {{ b.account_number }} ({{ b.bank_name }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-circle"></i>
+                            Aucun bénéficiaire enregistré.
+                            <a href="{{ url_for('add_beneficiary') }}" class="alert-link">
+                                Ajouter un bénéficiaire
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Montant -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-currency-euro"></i> Montant (€) *
+                        </label>
+                        <input type="number" name="amount" class="form-control"
+                               min="0.01" max="50000" step="0.01"
+                               placeholder="0.00" required>
+                        <small class="text-muted">Minimum 0,01 € — Maximum 50 000 €</small>
+                    </div>
+
+                    <!-- Libellé -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-chat-text"></i> Libellé (optionnel)
+                        </label>
+                        <input type="text" name="description" class="form-control"
+                               maxlength="200" placeholder="Ex: Remboursement restaurant">
+                    </div>
+
+                    <button type="submit" class="btn btn-dragon w-100 mt-3" id="submitBtn" disabled>
+                        <i class="bi bi-send"></i> Effectuer le virement
+                    </button>
+
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-dragon-outline w-100 mt-2">
+                        <i class="bi bi-arrow-left"></i> Retour au tableau de bord
+                    </a>
+
+                </form>
+            </div>
+
+            <!-- Info si aucun compte -->
+            {% if not accounts %}
+            <div class="section-card text-center py-4 mt-3">
+                <i class="bi bi-wallet" style="font-size: 3rem; color: var(--dragon-text-light);"></i>
+                <h4 class="mt-3">Aucun compte disponible</h4>
+                <p class="text-muted">Vous devez posséder au moins un compte pour effectuer un virement.</p>
+                <a href="{{ url_for('open_account') }}" class="btn btn-dragon">
+                    <i class="bi bi-plus-circle"></i> Ouvrir un compte
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const selectType        = document.getElementById('transferType');
+    const groupToAccount    = document.getElementById('toAccountGroup');
+    const groupBeneficiary  = document.getElementById('beneficiaryGroup');
+    const selectToAccount   = document.getElementById('toAccountSelect');
+    const selectBeneficiary = document.getElementById('beneficiarySelect');
+    const btnSubmit         = document.getElementById('submitBtn');
+
+    // Affiche ou masque les champs selon le type de virement choisi
+    selectType.addEventListener('change', function () {
+        var type = this.value;
+
+        if (type === 'internal') {
+            groupToAccount.style.display   = 'block';
+            groupBeneficiary.style.display = 'none';
+            if (selectToAccount)   { selectToAccount.required   = true; }
+            if (selectBeneficiary) { selectBeneficiary.required = false; }
+
+        } else if (type === 'person') {
+            groupToAccount.style.display   = 'none';
+            groupBeneficiary.style.display = 'block';
+            if (selectToAccount)   { selectToAccount.required   = false; }
+            if (selectBeneficiary) { selectBeneficiary.required = true; }
+
+        } else {
+            groupToAccount.style.display   = 'none';
+            groupBeneficiary.style.display = 'none';
+            if (selectToAccount)   { selectToAccount.required   = false; }
+            if (selectBeneficiary) { selectBeneficiary.required = false; }
+        }
+
+        btnSubmit.disabled = (type === '');
+    });
+</script>
+{% endblock %}

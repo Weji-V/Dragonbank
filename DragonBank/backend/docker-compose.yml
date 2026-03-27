@@ -1,0 +1,105 @@
+services:
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    container_name: dragonbank-db
+    environment:
+      POSTGRES_DB: dragonbank
+      POSTGRES_USER: dragonadmin
+      POSTGRES_PASSWORD: dragonpass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - dragonbank-backend-net
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dragonadmin -d dragonbank"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dragonbank-backend
+    environment:
+      DATABASE_URL: postgresql://dragonadmin:dragonpass@db:5432/dragonbank
+      SECRET_KEY: dragonbank-super-secret-key-2024
+      FLASK_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - dragonbank-backend-net
+      - dragonbank-frontend-net
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: dragonbank-frontend
+    environment:
+      BACKEND_URL: http://backend:5000
+      SECRET_KEY: frontend-secret-key-2024
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - dragonbank-frontend-net
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  interests:
+    build:
+      context: ./interests
+      dockerfile: Dockerfile
+    container_name: dragonbank-interests
+    environment:
+      DATABASE_URL: postgresql://dragonadmin:dragonpass@db:5432/dragonbank
+      INTEREST_RATE_LIVRET_A: 0.03
+      INTEREST_RATE_ASSURANCE_VIE: 0.02
+      INTERVAL_SECONDS: 86400
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - dragonbank-backend-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import psycopg2; psycopg2.connect('postgresql://dragonadmin:dragonpass@db:5432/dragonbank')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  dragonbank-backend-net:
+    driver: bridge
+  dragonbank-frontend-net:
+    driver: bridge

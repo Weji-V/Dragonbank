@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+{% block title %}Simulateur d'Épargne{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="bi bi-graph-up-arrow"></i> Simulateur d'Épargne</h1>
+        <p>Projetez la croissance de votre épargne avec les intérêts composés</p>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Formulaire de simulation -->
+        <div class="col-lg-4">
+            <div class="section-card">
+                <div class="section-title">Paramètres</div>
+
+                <form method="POST" action="{{ url_for('simulator') }}" id="simForm">
+
+                    {% if comptes_epargne %}
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-piggy-bank"></i> Pré-remplir depuis un compte
+                        </label>
+                        <select id="presetCompte" class="form-select">
+                            <option value="">— Saisie manuelle —</option>
+                            {% for c in comptes_epargne %}
+                            <option value="{{ c.balance }}" data-taux="{{ c.interest_rate * 100 }}">
+                                {% if c.account_type == 'livret_a' %}Livret A
+                                {% elif c.account_type == 'assurance_vie' %}Assurance Vie
+                                {% else %}{{ c.account_type }}{% endif %}
+                                — {{ "%.2f"|format(c.balance) }} €
+                                ({{ "%.1f"|format(c.interest_rate * 100) }} %)
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-currency-euro"></i> Capital initial (€)
+                        </label>
+                        <input type="number" name="capital_initial" id="capitalInitial"
+                               class="form-control" min="0" step="100" value="1000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-percent"></i> Taux annuel (%)
+                        </label>
+                        <input type="number" name="taux_annuel" id="tauxAnnuel"
+                               class="form-control" min="0" max="100" step="0.1" value="3.0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-calendar-range"></i> Durée (années)
+                        </label>
+                        <input type="number" name="duree_annees" id="dureeAnnees"
+                               class="form-control" min="1" max="40" step="1" value="10" required>
+                        <small class="form-text">Entre 1 et 40 ans</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-plus-circle"></i> Versement mensuel (€)
+                        </label>
+                        <input type="number" name="versement_mensuel" id="versementMensuel"
+                               class="form-control" min="0" step="50" value="0">
+                        <small class="form-text">Optionnel — laissez 0 si aucun</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-dragon w-100 mt-2">
+                        <i class="bi bi-calculator"></i> Calculer
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Résultats -->
+        <div class="col-lg-8">
+
+            {% if resultat %}
+            <!-- Métriques clés -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card success fade-in">
+                        <div class="stat-icon">
+                            <i class="bi bi-trophy"></i>
+                        </div>
+                        <div class="stat-value">
+                            {{ "%.2f"|format(resultat.capital_final) }} €
+                        </div>
+                        <div class="stat-label">Capital final</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card info fade-in delay-1">
+                        <div class="stat-icon">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <div class="stat-value">
+                            {{ "%.2f"|format(resultat.total_interets) }} €
+                        </div>
+                        <div class="stat-label">Intérêts générés</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card warning fade-in delay-2">
+                        <div class="stat-icon">
+                            <i class="bi bi-percent"></i>
+                        </div>
+                        <div class="stat-value">
+                            +{{ "%.1f"|format(resultat.gain_pourcentage) }} %
+                        </div>
+                        <div class="stat-label">Gain sur versements</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphique -->
+            <div class="section-card fade-in delay-3">
+                <div class="section-title">
+                    <i class="bi bi-bar-chart-line"></i> Évolution sur {{ resultat.duree_annees }} an(s)
+                </div>
+                <canvas id="simulatorChart" height="280"></canvas>
+            </div>
+
+            <!-- Tableau année par année -->
+            <div class="section-card fade-in delay-4">
+                <div class="section-title">
+                    <i class="bi bi-table"></i> Détail annuel
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Année</th>
+                                <th class="text-end">Total versé</th>
+                                <th class="text-end">Intérêts</th>
+                                <th class="text-end">Capital total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for point in resultat.courbe %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-secondary">An {{ point.annee }}</span>
+                                </td>
+                                <td class="text-end text-muted" style="font-family: var(--font-mono);">
+                                    {{ "%.2f"|format(point.total_verse) }} €
+                                </td>
+                                <td class="text-end" style="font-family: var(--font-mono); color: var(--c-green); font-weight: 500;">
+                                    +{{ "%.2f"|format(point.interets) }} €
+                                </td>
+                                <td class="text-end fw-bold" style="font-family: var(--font-mono);">
+                                    {{ "%.2f"|format(point.solde) }} €
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% else %}
+            <!-- État initial — pas encore simulé -->
+            <div class="section-card text-center py-5 fade-in">
+                <i class="bi bi-graph-up-arrow"
+                   style="font-size: 5rem; color: var(--c-accent); opacity: 0.3;"></i>
+                <h3 class="mt-4" style="color: var(--c-text-secondary);">
+                    Renseignez les paramètres et cliquez sur <strong>Calculer</strong>
+                </h3>
+                <p class="text-muted mt-2">
+                    Le simulateur applique la formule des intérêts composés avec versements mensuels réguliers.
+                </p>
+
+                <div class="row g-3 mt-4 text-start">
+                    <div class="col-md-4">
+                        <div class="section-card" style="border-left: 3px solid var(--c-green);">
+                            <h6 class="fw-bold mb-1">
+                                <i class="bi bi-piggy-bank" style="color: var(--c-green);"></i>
+                                Livret A
+                            </h6>
+                            <p class="text-muted mb-0" style="font-size: 0.8125rem;">
+                                Taux réglementé de 3 % par cycle. Essayez avec 10 ans.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="section-card" style="border-left: 3px solid var(--c-amber);">
+                            <h6 class="fw-bold mb-1">
+                                <i class="bi bi-shield-check" style="color: var(--c-amber);"></i>
+                                Assurance Vie
+                            </h6>
+                            <p class="text-muted mb-0" style="font-size: 0.8125rem;">
+                                Fonds euros à 2 % par cycle. Idéal sur le long terme.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="section-card" style="border-left: 3px solid var(--c-accent);">
+                            <h6 class="fw-bold mb-1">
+                                <i class="bi bi-plus-circle" style="color: var(--c-accent);"></i>
+                                Versement mensuel
+                            </h6>
+                            <p class="text-muted mb-0" style="font-size: 0.8125rem;">
+                                Ajoutez un versement régulier pour voir l'effet de l'épargne progressive.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if resultat %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+    var courbe      = {{ resultat.courbe | tojson }};
+    var labels      = courbe.map(function(p) { return 'An ' + p.annee; });
+    var soldes      = courbe.map(function(p) { return p.solde; });
+    var verses      = courbe.map(function(p) { return p.total_verse; });
+    var interets    = courbe.map(function(p) { return p.interets; });
+
+    var ctx = document.getElementById('simulatorChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Total versé',
+                    data: verses,
+                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                    borderColor: 'rgba(59, 130, 246, 0.8)',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    stack: 'stack'
+                },
+                {
+                    label: 'Intérêts générés',
+                    data: interets,
+                    backgroundColor: 'rgba(0, 200, 150, 0.6)',
+                    borderColor: 'rgba(0, 200, 150, 0.9)',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    stack: 'stack'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: { family: "'DM Sans', sans-serif", size: 12 },
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            return ctx.dataset.label + ' : ' + ctx.parsed.y.toFixed(2) + ' €';
+                        },
+                        afterBody: function(items) {
+                            var annee = items[0].dataIndex;
+                            return 'Capital total : ' + soldes[annee].toFixed(2) + ' €';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: { display: false },
+                    ticks: {
+                        font: { family: "'DM Sans', sans-serif", size: 11 }
+                    }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: {
+                        font: { family: "'DM Mono', monospace", size: 11 },
+                        callback: function(val) { return val.toFixed(0) + ' €'; }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+
+<script>
+    // Pré-remplissage depuis le compte épargne sélectionné
+    var selectPreset = document.getElementById('presetCompte');
+    if (selectPreset) {
+        selectPreset.addEventListener('change', function () {
+            var option = this.options[this.selectedIndex];
+            var solde  = parseFloat(option.value) || 0;
+            var taux   = parseFloat(option.getAttribute('data-taux')) || 0;
+
+            if (solde > 0) {
+                document.getElementById('capitalInitial').value = solde.toFixed(2);
+                document.getElementById('tauxAnnuel').value    = taux.toFixed(1);
+            }
+        });
+    }
+</script>
+{% endblock %}

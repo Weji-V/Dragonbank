@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Historique des Transactions{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h1><i class="bi bi-clock-history"></i> Historique des Transactions</h1>
+            <p>Consultez et exportez toutes vos opérations bancaires</p>
+        </div>
+        <a href="{{ url_for('export_transactions', account_id=selected_account or '') }}"
+           class="btn btn-dragon-outline">
+            <i class="bi bi-download"></i> Exporter CSV
+        </a>
+    </div>
+
+    <!-- Filtres -->
+    <div class="section-card mb-4">
+        <form method="GET" action="{{ url_for('transactions') }}" class="row g-3 align-items-end">
+
+            <div class="col-md-4">
+                <label class="form-label"><i class="bi bi-wallet2"></i> Compte</label>
+                <select name="account_id" class="form-select">
+                    <option value="">Tous les comptes</option>
+                    {% for account in accounts %}
+                    <option value="{{ account.id }}"
+                        {% if selected_account == account.id|string %}selected{% endif %}>
+                        {{ account.account_number }} —
+                        {% if account.account_type == 'courant' %}Courant
+                        {% elif account.account_type == 'livret_a' %}Livret A
+                        {% elif account.account_type == 'assurance_vie' %}Assurance Vie
+                        {% else %}{{ account.account_type }}{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label"><i class="bi bi-tag"></i> Type</label>
+                <select name="type" class="form-select">
+                    <option value="">Tous les types</option>
+                    <option value="virement_interne">Virement interne</option>
+                    <option value="virement_entre_personnes">Virement personne</option>
+                    <option value="virement_externe">Virement externe</option>
+                    <option value="depot">Dépôt</option>
+                    <option value="interets">Intérêts</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label"><i class="bi bi-search"></i> Recherche</label>
+                <input type="text" id="searchInput" class="form-control"
+                       placeholder="Libellé, numéro de compte...">
+            </div>
+
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-dragon flex-grow-1">
+                    <i class="bi bi-funnel"></i> Filtrer
+                </button>
+                {% if selected_account %}
+                <a href="{{ url_for('transactions') }}" class="btn btn-dragon-outline" title="Réinitialiser">
+                    <i class="bi bi-x-circle"></i>
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Tableau -->
+    <div class="section-card">
+        {% if transactions %}
+        <div class="table-responsive">
+            <table class="table table-hover" id="transactionsTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Libellé</th>
+                        <th>De / Vers</th>
+                        <th class="text-end">Montant</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionsBody">
+                    {% for t in transactions %}
+                    <tr class="transaction-row">
+                        <td><small class="text-muted">{{ t.created_at[:16].replace('T', ' ') if t.created_at else 'N/A' }}</small></td>
+                        <td>
+                            {% if t.transaction_type == 'virement_interne' %}
+                                <span class="badge bg-primary">Interne</span>
+                            {% elif t.transaction_type == 'virement_entre_personnes' %}
+                                <span class="badge bg-info">Personne</span>
+                            {% elif t.transaction_type == 'virement_externe' %}
+                                <span class="badge bg-warning">Externe</span>
+                            {% elif t.transaction_type == 'depot' %}
+                                <span class="badge bg-success">Dépôt</span>
+                            {% elif t.transaction_type == 'retrait' %}
+                                <span class="badge bg-danger">Retrait</span>
+                            {% elif t.transaction_type == 'interets' %}
+                                <span class="badge bg-success">Intérêts</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ t.transaction_type }}</span>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ t.description or '—' }}</small></td>
+                        <td>
+                            <small>
+                                {% if t.from_account_number %}<code>{{ t.from_account_number }}</code>{% endif %}
+                                {% if t.from_account_number and t.to_account_number %}<i class="bi bi-arrow-right text-muted"></i>{% endif %}
+                                {% if t.to_account_number %}<code>{{ t.to_account_number }}</code>{% endif %}
+                                {% if t.external_bank_name %}<i class="bi bi-bank text-muted"></i> {{ t.external_bank_name }}{% endif %}
+                            </small>
+                        </td>
+                        <td class="text-end" style="font-family: var(--font-mono); letter-spacing: -0.5px; font-weight: 500;">
+                            {{ "%.2f"|format(t.amount) }} €
+                        </td>
+                        <td>
+                            {% if t.status == 'completed' %}
+                                <span class="status-badge completed"><i class="bi bi-check-circle"></i> Effectué</span>
+                            {% elif t.status == 'pending' %}
+                                <span class="status-badge pending"><i class="bi bi-hourglass"></i> En cours</span>
+                            {% elif t.status == 'failed' %}
+                                <span class="status-badge failed"><i class="bi bi-x-circle"></i> Échoué</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ t.status }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <small class="text-muted" id="transactionCount">
+                <i class="bi bi-info-circle"></i> {{ transactions|length }} transaction(s) affichée(s)
+            </small>
+            <a href="{{ url_for('export_transactions', account_id=selected_account or '') }}"
+               class="btn btn-sm btn-dragon-outline">
+                <i class="bi bi-download"></i> Exporter en CSV
+            </a>
+        </div>
+
+        <div id="noResults" class="text-center py-4" style="display: none;">
+            <i class="bi bi-search" style="font-size: 2.5rem; color: var(--c-text-tertiary);"></i>
+            <p class="text-muted mt-2">Aucune transaction ne correspond à votre recherche.</p>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-clock-history" style="font-size: 4rem; color: var(--c-text-tertiary);"></i>
+            <h3 class="mt-3">Aucune transaction</h3>
+            <p class="text-muted">Votre historique apparaîtra ici après vos premiers virements.</p>
+            <a href="{{ url_for('transfer') }}" class="btn btn-dragon mt-2">
+                <i class="bi bi-send"></i> Effectuer un virement
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var inputRecherche = document.getElementById('searchInput');
+    var corps          = document.getElementById('transactionsBody');
+    var compteur       = document.getElementById('transactionCount');
+    var messageVide    = document.getElementById('noResults');
+
+    if (inputRecherche && corps) {
+        inputRecherche.addEventListener('input', function () {
+            var terme   = this.value.toLowerCase().trim();
+            var lignes  = corps.querySelectorAll('.transaction-row');
+            var nbVisible = 0;
+
+            for (var i = 0; i < lignes.length; i++) {
+                var texte = lignes[i].textContent.toLowerCase();
+                if (terme === '' || texte.includes(terme)) {
+                    lignes[i].style.display = '';
+                    nbVisible++;
+                } else {
+                    lignes[i].style.display = 'none';
+                }
+            }
+
+            if (compteur) {
+                compteur.innerHTML = '<i class="bi bi-info-circle"></i> ' + nbVisible + ' transaction(s) affichée(s)';
+            }
+            if (messageVide) {
+                messageVide.style.display = (nbVisible === 0 && terme !== '') ? 'block' : 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -149,6 +149,76 @@ def dashboard():
 
 
 # ============================================
+# ROUTES - PROFIL
+# ============================================
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    """Page de profil pour gerer la securite et les infos persos."""
+    token = session['token']
+    
+    if request.method == 'POST':
+        action = request.form.get('action')
+        
+        if action == 'update_profile':
+            phone = request.form.get('phone', '')
+            address = request.form.get('address', '')
+            
+            data, status = api_request('PUT', '/api/user/profile', {
+                'phone': phone,
+                'address': address
+            }, token=token)
+            
+            if status == 200:
+                flash('Informations personnelles mises a jour !', 'success')
+            else:
+                flash(data.get('error', 'Erreur lors de la mise a jour'), 'danger')
+                
+        elif action == 'update_password':
+            current_password = request.form.get('current_password')
+            new_password = request.form.get('new_password')
+            confirm_password = request.form.get('confirm_password')
+            
+            if new_password != confirm_password:
+                flash('Les nouveaux mots de passe ne correspondent pas', 'danger')
+            else:
+                data, status = api_request('PUT', '/api/user/security/password', {
+                    'current_password': current_password,
+                    'new_password': new_password
+                }, token=token)
+                
+                if status == 200:
+                    flash('Mot de passe mis a jour avec succes !', 'success')
+                else:
+                    flash(data.get('error', 'Erreur'), 'danger')
+                    
+        elif action == 'update_email':
+            password = request.form.get('password')
+            new_email = request.form.get('new_email')
+            
+            data, status = api_request('PUT', '/api/user/security/email', {
+                'password': password,
+                'new_email': new_email
+            }, token=token)
+            
+            if status == 200:
+                flash('Email mis a jour avec succes. Vous devez vous reconnecter pour valider les changements.', 'success')
+                session.clear()
+                return redirect(url_for('login'))
+            else:
+                flash(data.get('error', 'Erreur'), 'danger')
+                
+    # Recuperation complete du profil et des comptes
+    profile_data, status_profile = api_request('GET', '/api/user/profile', token=token)
+    accounts_data, status_accounts = api_request('GET', '/api/accounts', token=token)
+    
+    user_profile = profile_data.get('user', session.get('user', {})) if status_profile == 200 else session.get('user', {})
+    accounts_list = accounts_data.get('accounts', []) if status_accounts == 200 else []
+                
+    return render_template('profile.html', user_profile=user_profile, accounts=accounts_list)
+
+
+# ============================================
 # ROUTES - COMPTES
 # ============================================
 @app.route('/accounts')
@@ -346,6 +416,84 @@ def transactions():
         transactions=data.get('transactions', []),
         accounts=accounts_data.get('accounts', []),
         selected_account=account_id
+    )
+
+
+# ============================================
+# ROUTES - EXPORT CSV
+# ============================================
+@app.route('/transactions/export')
+@login_required
+def export_transactions():
+    """Redirige vers le backend pour télécharger le CSV des transactions."""
+    import requests as req
+    token = session['token']
+    account_id = request.args.get('account_id', '')
+
+    endpoint = f"{BACKEND_URL}/api/transactions/export"
+    if account_id:
+        endpoint += f"?account_id={account_id}"
+
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json'
+    }
+
+    try:
+        resp = req.get(endpoint, headers=headers, timeout=15)
+        if resp.status_code == 200:
+            from flask import Response
+            return Response(
+                resp.content,
+                mimetype='text/csv',
+                headers={
+                    'Content-Disposition': 'attachment; filename="dragonbank_transactions.csv"'
+                }
+            )
+        else:
+            flash('Erreur lors de la génération du CSV', 'danger')
+            return redirect(url_for('transactions'))
+    except Exception as e:
+        flash('Impossible de contacter le serveur', 'danger')
+        return redirect(url_for('transactions'))
+
+
+# ============================================
+# ROUTES - SIMULATEUR D'ÉPARGNE
+# ============================================
+@app.route('/simulator', methods=['GET', 'POST'])
+@login_required
+def simulator():
+    """Simulateur de croissance de l'épargne avec graphique."""
+    token = session['token']
+    resultat = None
+
+    # Récupération des comptes épargne pour pré-remplir le simulateur
+    accounts_data, _ = api_request('GET', '/api/accounts', token=token)
+    comptes_epargne = [
+        a for a in accounts_data.get('accounts', [])
+        if a.get('account_type') in ('livret_a', 'assurance_vie')
+    ]
+
+    if request.method == 'POST':
+        form_data = {
+            'capital_initial':   float(request.form.get('capital_initial', 0)),
+            'taux_annuel':       float(request.form.get('taux_annuel', 3)),
+            'duree_annees':      int(request.form.get('duree_annees', 10)),
+            'versement_mensuel': float(request.form.get('versement_mensuel', 0))
+        }
+
+        data, status = api_request('POST', '/api/simulator', data=form_data, token=token)
+
+        if status == 200:
+            resultat = data
+        else:
+            flash(data.get('error', 'Erreur de simulation'), 'danger')
+
+    return render_template('simulator.html',
+        user=session.get('user', {}),
+        comptes_epargne=comptes_epargne,
+        resultat=resultat
     )
 
 

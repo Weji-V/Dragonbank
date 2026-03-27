@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Ouvrir un Compte{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="bi bi-plus-circle"></i> Ouvrir un Compte</h1>
+        <p>Choisissez le type de compte à ouvrir</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="section-card fade-in">
+                <form method="POST" action="{{ url_for('open_account') }}">
+
+                    <!-- Type de compte -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-wallet2"></i> Type de compte *
+                        </label>
+                        <select name="account_type" class="form-select" required>
+                            <option value="">-- Choisissez un type --</option>
+                            <option value="courant">
+                                Compte Courant — taux 0 %
+                            </option>
+                            <option value="livret_a">
+                                Livret A — taux 3 % / cycle
+                            </option>
+                            <option value="assurance_vie">
+                                Assurance Vie — taux 2 % / cycle
+                            </option>
+                        </select>
+                        <small class="text-muted">
+                            Un seul Livret A et une seule Assurance Vie par client.
+                        </small>
+                    </div>
+
+                    <!-- Dépôt initial -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-currency-euro"></i> Dépôt initial (optionnel)
+                        </label>
+                        <input type="number" name="initial_deposit" class="form-control"
+                               min="0" step="0.01" placeholder="0.00" value="0">
+                        <small class="text-muted">
+                            Laissez 0 pour ouvrir le compte sans dépôt initial.
+                        </small>
+                    </div>
+
+                    <button type="submit" class="btn btn-dragon w-100 mt-3">
+                        <i class="bi bi-check-circle"></i> Ouvrir le compte
+                    </button>
+
+                    <a href="{{ url_for('accounts') }}" class="btn btn-dragon-outline w-100 mt-2">
+                        <i class="bi bi-arrow-left"></i> Retour à mes comptes
+                    </a>
+
+                </form>
+            </div>
+
+            <!-- Récapitulatif des types de comptes -->
+            <div class="row g-3 mt-2">
+                <div class="col-12">
+                    <div class="section-card courant" style="border-left: 4px solid var(--dragon-primary);">
+                        <h6><i class="bi bi-credit-card"></i> Compte Courant</h6>
+                        <p class="text-muted mb-0 small">
+                            Compte de tous les jours pour vos dépenses et virements. Pas d'intérêts.
+                            Plusieurs comptes autorisés.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="section-card" style="border-left: 4px solid #28a745;">
+                        <h6><i class="bi bi-piggy-bank"></i> Livret A</h6>
+                        <p class="text-muted mb-0 small">
+                            Épargne réglementée à taux fixe de 3 % par cycle. Un seul Livret A autorisé.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="section-card" style="border-left: 4px solid #ffc107;">
+                        <h6><i class="bi bi-shield-check"></i> Assurance Vie</h6>
+                        <p class="text-muted mb-0 small">
+                            Placement long terme à 2 % par cycle sur les fonds euros.
+                            Une seule Assurance Vie autorisée.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

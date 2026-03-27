@@ -6,6 +6,8 @@ LABEL description="DragonBank Backend API"
 # Variables d'environnement
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+# Permet a Python de trouver les modules locaux (config, database, auth...)
+ENV PYTHONPATH=/app
 
 # Répertoire de travail
 WORKDIR /app
@@ -24,8 +26,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copie du code source
-COPY app.py .
+# Copie de tout le code source (app.py + modules + dossier models/)
+COPY . .
 
 # Création d'un utilisateur non-root (sécurité)
 RUN adduser --disabled-password --gecos '' appuser && \

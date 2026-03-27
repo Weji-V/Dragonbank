@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block title %}Mon Profil{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12 text-center text-white">
+            <h2 class="dragon-title"><i class="bi bi-shield-lock"></i> Mon Profil & Sécurité</h2>
+            <p>Gérez vos informations personnelles, bancaires et de connexion</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <!-- COLONNE GAUCHE : INFOS PERSONNELLES & BANCAIRES -->
+        <div class="col-md-6 mb-4">
+            
+            <!-- INFORMATIONS PERSONNELLES -->
+            <div class="card bg-dark text-white dragon-card mb-4">
+                <div class="card-header bg-transparent border-bottom border-secondary">
+                    <h5 class="mb-0"><i class="bi bi-person-vcard"></i> Informations Personnelles</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('profile') }}">
+                        <input type="hidden" name="action" value="update_profile">
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Prénom</label>
+                                <input type="text" class="form-control bg-secondary text-white border-0" value="{{ user_profile.get('first_name', '') }}" disabled>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Nom</label>
+                                <input type="text" class="form-control bg-secondary text-white border-0" value="{{ user_profile.get('last_name', '') }}" disabled>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Numéro de téléphone</label>
+                            <input type="text" class="form-control" id="phone" name="phone" value="{{ user_profile.get('phone', '') or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Adresse postale</label>
+                            <input type="text" class="form-control" id="address" name="address" value="{{ user_profile.get('address', '') or '' }}">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-warning w-100 dragon-btn">Mettre à jour mes informations</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- INFORMATIONS BANCAIRES -->
+            <div class="card bg-dark text-white dragon-card">
+                <div class="card-header bg-transparent border-bottom border-secondary">
+                    <h5 class="mb-0"><i class="bi bi-bank"></i> Mes Comptes Bancaires</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush bg-transparent">
+                        {% for account in accounts %}
+                        <li class="list-group-item bg-transparent text-white border-secondary">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ account.account_type | capitalize | replace('_', ' ') }}</strong>
+                                    <small class="d-block text-muted font-monospace">{{ account.account_number }}</small>
+                                </div>
+                                <span class="badge bg-success rounded-pill px-3 py-2 fs-6">{{ "%.2f"|format(account.balance) }} €</span>
+                            </div>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item bg-transparent text-white border-0 text-muted text-center py-4">
+                            <i class="bi bi-wallet2 fs-2 d-block mb-2"></i>
+                            Aucun compte bancaire ouvert
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- COLONNE DROITE : EMAIL ET MOT DE PASSE -->
+        <div class="col-md-6 mb-4">
+            
+            <!-- CHANGEMENT EMAIL -->
+            <div class="card bg-dark text-white dragon-card mb-4">
+                <div class="card-header bg-transparent border-bottom border-secondary">
+                    <h5 class="mb-0"><i class="bi bi-envelope"></i> Changer d'adresse e-mail</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('profile') }}">
+                        <input type="hidden" name="action" value="update_email">
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Adresse e-mail actuelle</label>
+                            <input type="text" class="form-control bg-secondary text-white border-0" value="{{ user_profile.get('email', '') }}" disabled>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="new_email" class="form-label">Nouvelle adresse e-mail</label>
+                            <input type="email" class="form-control" id="new_email" name="new_email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password_for_email" class="form-label">Mot de passe actuel (requis)</label>
+                            <input type="password" class="form-control" id="password_for_email" name="password" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-warning w-100 dragon-btn">Modifier mon e-mail</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- CHANGEMENT MOT DE PASSE -->
+            <div class="card bg-dark text-white dragon-card">
+                <div class="card-header bg-transparent border-bottom border-secondary">
+                    <h5 class="mb-0"><i class="bi bi-key"></i> Changer de mot de passe</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('profile') }}">
+                        <input type="hidden" name="action" value="update_password">
+                        
+                        <div class="mb-3">
+                            <label for="current_password" class="form-label">Mot de passe actuel</label>
+                            <input type="password" class="form-control" id="current_password" name="current_password" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">Nouveau mot de passe</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" required>
+                            <div class="form-text text-muted">Minimum 8 caractères, une majuscule et un chiffre.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirmez le mot de passe</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-warning w-100 dragon-btn">Mettre à jour le mot de passe</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

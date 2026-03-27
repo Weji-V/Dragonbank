@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Mes Bénéficiaires{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <div>
+            <h1><i class="bi bi-people"></i> Mes Bénéficiaires</h1>
+            <p>Gérez vos contacts de virement</p>
+        </div>
+        <a href="{{ url_for('add_beneficiary') }}" class="btn btn-dragon">
+            <i class="bi bi-person-plus"></i> Ajouter un bénéficiaire
+        </a>
+    </div>
+
+    <div class="row g-4">
+        {% for b in beneficiaries %}
+        <div class="col-lg-6 fade-in delay-{{ loop.index }}">
+            <div class="section-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="mb-1">
+                            <i class="bi bi-person-circle"></i> {{ b.beneficiary_name }}
+                        </h5>
+                        <p class="text-muted mb-1">
+                            <i class="bi bi-bank"></i> {{ b.bank_name }}
+                        </p>
+                        <p class="mb-1">
+                            <i class="bi bi-hash"></i>
+                            <code>{{ b.account_number }}</code>
+                        </p>
+                        {% if b.iban %}
+                        <p class="text-muted mb-1">
+                            <i class="bi bi-upc"></i> {{ b.iban }}
+                        </p>
+                        {% endif %}
+                        <small class="text-muted">
+                            <i class="bi bi-calendar"></i>
+                            Ajouté le {{ b.created_at[:10] if b.created_at else 'N/A' }}
+                        </small>
+                    </div>
+                    <div class="d-flex flex-column gap-2">
+                        <span class="status-badge completed">
+                            <i class="bi bi-check-circle"></i> {{ b.status }}
+                        </span>
+                        <a href="{{ url_for('delete_beneficiary', beneficiary_id=b.id) }}"
+                           class="btn btn-sm btn-danger"
+                           onclick="return confirm('Supprimer ce bénéficiaire ?')">
+                            <i class="bi bi-trash"></i> Supprimer
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <a href="{{ url_for('transfer') }}" class="btn btn-sm btn-dragon">
+                        <i class="bi bi-send"></i> Faire un virement
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="section-card text-center py-5">
+                <i class="bi bi-people" style="font-size: 4rem; color: var(--dragon-text-light);"></i>
+                <h3 class="mt-3">Aucun bénéficiaire enregistré</h3>
+                <p class="text-muted">Ajoutez un bénéficiaire pour effectuer des virements</p>
+                <a href="{{ url_for('add_beneficiary') }}" class="btn btn-dragon mt-2">
+                    <i class="bi bi-person-plus"></i> Ajouter un bénéficiaire
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
