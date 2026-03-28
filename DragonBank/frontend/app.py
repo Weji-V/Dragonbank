@@ -234,26 +234,41 @@ def accounts():
     )
 
 
+# Labels lisibles pour les types de comptes
+ACCOUNT_LABELS = {
+    'courant':       'Compte Courant',
+    'livret_a':      'Livret A',
+    'assurance_vie': 'Assurance Vie',
+}
+
+
 @app.route('/accounts/open', methods=['GET', 'POST'])
 @login_required
 def open_account():
     """Ouverture d'un nouveau compte."""
+    token = session['token']
+    accounts_data, _ = api_request('GET', '/api/accounts', token=token)
+    accounts_list = accounts_data.get('accounts', [])
+
     if request.method == 'POST':
-        token = session['token']
+        type_compte = request.form.get('account_type')
         form_data = {
-            'account_type': request.form.get('account_type'),
+            'account_type': type_compte,
             'initial_deposit': float(request.form.get('initial_deposit', 0))
         }
-        
+
         data, status = api_request('POST', '/api/accounts', data=form_data, token=token)
-        
+
         if status == 201:
-            flash(f'Compte {form_data["account_type"]} ouvert avec succès ! 🎉', 'success')
+            label = ACCOUNT_LABELS.get(type_compte, type_compte)
+            flash(f'{label} ouvert avec succès ! 🎉', 'success')
             return redirect(url_for('accounts'))
         else:
-            flash(data.get('error', 'Erreur lors de l\'ouverture du compte'), 'danger')
-    
-    return render_template('open_account.html', user=session.get('user', {}))
+            flash(data.get('error', "Erreur lors de l'ouverture du compte"), 'danger')
+
+    return render_template('open_account.html',
+                           user=session.get('user', {}),
+                           accounts=accounts_list)
 
 
 # ============================================

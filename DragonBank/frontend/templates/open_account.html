@@ -11,6 +11,18 @@
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="section-card fade-in">
+
+                {% set compte_courant = accounts | selectattr('account_type', 'equalto', 'courant') | list | first %}
+                {% if compte_courant %}
+                <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <div>
+                        Solde disponible sur votre Compte Courant :
+                        <strong>{{ "%.2f"|format(compte_courant.balance) }} €</strong>
+                    </div>
+                </div>
+                {% endif %}
+
                 <form method="POST" action="{{ url_for('open_account') }}">
 
                     <!-- Type de compte -->
@@ -18,7 +30,8 @@
                         <label class="form-label">
                             <i class="bi bi-wallet2"></i> Type de compte *
                         </label>
-                        <select name="account_type" class="form-select" required>
+                        <select name="account_type" id="account_type" class="form-select" required
+                                onchange="updateDepositLabel(this.value)">
                             <option value="">-- Choisissez un type --</option>
                             <option value="courant">
                                 Compte Courant — taux 0 %
@@ -36,15 +49,22 @@
                     </div>
 
                     <!-- Dépôt initial -->
-                    <div class="form-group">
+                    <div class="form-group" id="depot-group">
                         <label class="form-label">
                             <i class="bi bi-currency-euro"></i> Dépôt initial (optionnel)
                         </label>
-                        <input type="number" name="initial_deposit" class="form-control"
-                               min="0" step="0.01" placeholder="0.00" value="0">
-                        <small class="text-muted">
+                        <input type="number" name="initial_deposit" id="initial_deposit"
+                               class="form-control" min="0" step="0.01" placeholder="0.00" value="0">
+                        <small class="text-muted" id="depot-hint">
                             Laissez 0 pour ouvrir le compte sans dépôt initial.
                         </small>
+                    </div>
+
+                    <!-- Info box dynamique pour livret A / assurance vie -->
+                    <div id="epargne-info" class="alert alert-warning d-none mb-3" role="alert">
+                        <i class="bi bi-arrow-left-right me-1"></i>
+                        Le montant saisi sera <strong>débité de votre Compte Courant</strong>
+                        et transféré vers le nouveau compte épargne.
                     </div>
 
                     <button type="submit" class="btn btn-dragon w-100 mt-3">
@@ -61,7 +81,7 @@
             <!-- Récapitulatif des types de comptes -->
             <div class="row g-3 mt-2">
                 <div class="col-12">
-                    <div class="section-card courant" style="border-left: 4px solid var(--dragon-primary);">
+                    <div class="section-card" style="border-left: 4px solid var(--dragon-primary);">
                         <h6><i class="bi bi-credit-card"></i> Compte Courant</h6>
                         <p class="text-muted mb-0 small">
                             Compte de tous les jours pour vos dépenses et virements. Pas d'intérêts.
@@ -73,7 +93,9 @@
                     <div class="section-card" style="border-left: 4px solid #28a745;">
                         <h6><i class="bi bi-piggy-bank"></i> Livret A</h6>
                         <p class="text-muted mb-0 small">
-                            Épargne réglementée à taux fixe de 3 % par cycle. Un seul Livret A autorisé.
+                            Épargne réglementée à taux fixe de 3 % par cycle.
+                            Le dépôt initial est prélevé sur votre Compte Courant.
+                            Un seul Livret A autorisé.
                         </p>
                     </div>
                 </div>
@@ -82,6 +104,7 @@
                         <h6><i class="bi bi-shield-check"></i> Assurance Vie</h6>
                         <p class="text-muted mb-0 small">
                             Placement long terme à 2 % par cycle sur les fonds euros.
+                            Le dépôt initial est prélevé sur votre Compte Courant.
                             Une seule Assurance Vie autorisée.
                         </p>
                     </div>
@@ -91,3 +114,20 @@
     </div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+function updateDepositLabel(type) {
+    const info = document.getElementById('epargne-info');
+    const hint = document.getElementById('depot-hint');
+    if (type === 'livret_a' || type === 'assurance_vie') {
+        info.classList.remove('d-none');
+        hint.textContent = 'Ce montant sera prélevé sur votre Compte Courant.';
+    } else {
+        info.classList.add('d-none');
+        hint.textContent = 'Laissez 0 pour ouvrir le compte sans dépôt initial.';
+    }
+}
+</script>
+{% endblock %}
+

@@ -71,8 +71,8 @@ TAUX_LIVRET_A = decimal.Decimal(os.environ.get('INTEREST_RATE_LIVRET_A', '0.03')
 TAUX_ASSURANCE_VIE = decimal.Decimal(os.environ.get('INTEREST_RATE_ASSURANCE_VIE', '0.02'))
 
 # Duree en secondes entre deux cycles de calcul des interets.
-# La valeur 86400 correspond a 24 heures.
-INTERVALLE_SECONDES = int(os.environ.get('INTERVAL_SECONDS', '86400'))
+# La valeur 900 correspond a 15 minutes.
+INTERVALLE_SECONDES = int(os.environ.get('INTERVAL_SECONDS', '900'))
 
 # Nombre maximum de tentatives de connexion a la DB au demarrage.
 TENTATIVES_CONNEXION_MAX = int(os.environ.get('DB_RETRY_MAX', '30'))

@@ -84,7 +84,7 @@ services:
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
       INTEREST_RATE_LIVRET_A: 0.03
       INTEREST_RATE_ASSURANCE_VIE: 0.02
-      INTERVAL_SECONDS: 60
+      INTERVAL_SECONDS: 900
     secrets:
       - db_password
     depends_on:
